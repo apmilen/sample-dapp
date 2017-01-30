@@ -1,0 +1,125 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+    <title>Sample Dapp</title>
+    <script src="lib/web3.min.js"></script>
+    <script src="lib/weth.js"></script>
+    <script src="lib/erc20.js"></script>
+
+    <style>
+        #flex-wrapper {
+            display: flex;
+        }
+
+        .flex-item {
+            margin: 0 10px;
+        }
+    </style>
+
+    <script>
+        const TOKEN_PRECISION = 1000000000000000000;
+        var erc20;
+        var weth;
+
+        function displayWithPrecision (bigNumber) {
+            return bigNumber.div(TOKEN_PRECISION).toNumber();
+        }
+
+        function deposit() {
+            const amount = web3.toBigNumber(document.getElementById("deposit-input").value);
+            weth.deposit(amount, (err, res) => {debugger;});
+        }
+
+        function withdraw() {}
+
+        function transfer() {}
+
+        function transferFrom() {}
+
+        function approval() {}
+
+        function balanceOf() {}
+
+        window.addEventListener('load', function() {
+            web3.version.getNetwork((err, res) => {
+                const network = res === "3" ? "ropsten" : "live";
+                const erc20_env = dapple["erc20"].environments[network];
+                const weth_env = dapple["ds-eth-token"].environments[network];
+
+                erc20 = new dapple["erc20"].class(web3, erc20_env).objects.erc20;
+                weth = new dapple["ds-eth-token"].class(web3, weth_env).objects.eth_token;
+
+                weth.balanceOf(web3.eth.coinbase, (err, res) => 
+                    document.getElementById("weth-balance").textContent =
+                        "W-ETH Balance: " + displayWithPrecision(res));
+
+                web3.eth.getBalance(web3.eth.coinbase, (err, res) => 
+                    document.getElementById("eth-balance").textContent = 
+                        "ETH Balance: " + displayWithPrecision(res));
+
+                weth.Deposit((address, amount) => {
+                    debugger;
+                });
+            });
+        });
+  </script>
+</head>
+
+<body>
+    <h3 id="weth-balance">Loading W-ETH Balance...</h3>
+    <h3 id="eth-balance">Loading ETH Balance...</h3>
+
+    <div id="flex-wrapper">
+        <div class="flex-item">
+            <div class="input-holder">
+                <h4>Deposit ETH</h4>
+                <input id="deposit-input" type="text" placeholder="0.00">
+                <button onclick="deposit()">Deposit</button>
+                <h4 id="deposit-result"></h4>
+            </div>
+            <div class="input-holder">
+                <h4>Withdraw ETH</h4>
+                <input id="withdraw-input" type="text" placeholder="0.00">
+                <button onclick="withdraw()">Withdraw</button>
+                <h4 id="withdraw-result"></h4>
+            </div>
+        </div>
+        <div class="flex-item">
+            <div class="input-holder">
+                <h4>Transfer to Account</h4>
+                <input id="transfer-amount-input" type="text" placeholder="0.00">
+                <input id="transfer-recipient-input" type="text" placeholder="Address">
+                <button onclick="transfer()">Transfer</button>
+                <h4 id="transfer-result"></h4>
+            </div>
+            <div class="input-holder">
+                <h4>Transfer from Account</h4>
+                <input id="transferFrom-amount-input" type="text" placeholder="0.00">
+                <input id="transferFrom-destination-input" type="text" placeholder="Address">
+                <button onclick="transferFrom()">Transfer From</button>
+                <h4 id="transferFrom-result"></h4>
+            </div>
+        </div>
+        <div class="flex-item">
+            <div class="input-holder">
+                <h4>Check an Account's Withdraw Limit on Your Account</h4>
+                <input id="approval-input" type="text" placeholder="Address">
+                <button onclick="approval()">Check</button>
+                <h4 id="approval-result"></h4>
+            </div>
+            <div class="input-holder">
+                <h4>Check an Account's Balance</h4>
+                <input id="balanceOf-input" type="text" placeholder="Address">
+                <button onclick="balanceOf()">Check</button>
+                <h4 id="balanceOf-result"></h4>
+            </div>
+        </div>
+        
+        
+        
+    </div>
+</body>
+</html>
