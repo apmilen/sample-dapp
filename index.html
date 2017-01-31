@@ -29,11 +29,19 @@
         }
 
         function deposit() {
-            const amount = web3.toBigNumber(document.getElementById("deposit-input").value);
-            weth.deposit(amount, (err, res) => {debugger;});
+            const amount = web3.toWei(document.getElementById("deposit-input").value);
+            weth.deposit({
+                gas: 150000,
+                value: amount
+            }, pendingBalanceUpdate);
         }
 
-        function withdraw() {}
+        function withdraw() {
+            const amount = web3.toWei(document.getElementById("withdraw-input").value);
+            weth.withdraw(amount, {
+                gas: 150000
+            }, pendingBalanceUpdate);
+        }
 
         function transfer() {}
 
@@ -42,6 +50,21 @@
         function approval() {}
 
         function balanceOf() {}
+
+        function updateBalances() {
+            weth.balanceOf(web3.eth.coinbase, (err, res) => 
+                    document.getElementById("weth-balance").textContent =
+                        "W-ETH Balance: " + displayWithPrecision(res));
+
+            web3.eth.getBalance(web3.eth.coinbase, (err, res) => 
+                document.getElementById("eth-balance").textContent = 
+                    "ETH Balance: " + displayWithPrecision(res));
+        }
+
+        function pendingBalanceUpdate() {
+            document.getElementById("weth-balance").textContent = "Updating W-ETH Balance...";
+            document.getElementById("eth-balance").textContent = "Updating ETH Balance...";
+        }
 
         window.addEventListener('load', function() {
             web3.version.getNetwork((err, res) => {
@@ -52,16 +75,18 @@
                 erc20 = new dapple["erc20"].class(web3, erc20_env).objects.erc20;
                 weth = new dapple["ds-eth-token"].class(web3, weth_env).objects.eth_token;
 
-                weth.balanceOf(web3.eth.coinbase, (err, res) => 
-                    document.getElementById("weth-balance").textContent =
-                        "W-ETH Balance: " + displayWithPrecision(res));
+                updateBalances();
 
-                web3.eth.getBalance(web3.eth.coinbase, (err, res) => 
-                    document.getElementById("eth-balance").textContent = 
-                        "ETH Balance: " + displayWithPrecision(res));
+                weth.Deposit((err, res) => {
+                    if (res.args.who === web3.eth.coinbase) {
+                        updateBalances();
+                    }
+                });
 
-                weth.Deposit((address, amount) => {
-                    debugger;
+                weth.Withdrawal((err, res) => {
+                    if (res.args.who === web3.eth.coinbase) {
+                        updateBalances();
+                    }
                 });
             });
         });
